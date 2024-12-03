@@ -10,12 +10,15 @@ body {
   color: #fff;
 }
 
+/* "WEATHER" HEADING */
 h1 {
   font-size: 2.5rem;
   margin-bottom: 20px;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
 }
 
+/* INPUT FORM */
+/* Form */
 form {
   display: flex;
   flex-wrap: wrap;
@@ -23,6 +26,7 @@ form {
   max-width: 400px;
 }
 
+/* Input Box */
 input {
   padding: 10px;
   font-size: 1rem;
@@ -31,6 +35,7 @@ input {
   box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2);
 }
 
+/* Submit Button */
 button {
   padding: 10px 15px;
   font-size: 1rem;
@@ -46,6 +51,8 @@ button:hover {
   background-color: #333333;
 }
 
+/* RESULTS */
+/* General Display */
 #results {
   display: none;
   background: rgba(225, 225, 225, 0.2);
@@ -57,6 +64,7 @@ button:hover {
   text-align: center;
 }
 
+/* Text Formatting */
 #results p {
   margin: 10px 0;
   line-height: 1.5;

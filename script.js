@@ -1,37 +1,44 @@
-/*import { apiKey } from "./config.js";
-console.log(apiKey);*/
-
+// get OpenWeatherMap API key
 var apiKey = config.API_KEY;
 
+// only after DOM loaded
 document.addEventListener("DOMContentLoaded", function () {
   var cityName;
   const form = document.getElementById("city_form");
   const results = document.getElementById("results");
+
+  // "Submit" button event handler
   form.addEventListener("submit", function (event) {
     event.preventDefault();
+
+    // fetch location from textbox
     cityName = document.getElementById("city_tbox").value;
     console.log(cityName);
 
+    // reset results on new input
     results.innerHTML = "";
 
+    // request to OpenWeatherMap API
     fetch(
       `https://api.openweathermap.org/data/2.5/weather?q=${cityName}&appid=${apiKey}&units=imperial&lang=en`
     )
+      // parse data into JS object
       .then(function (response) {
         return response.json();
       })
       .then(function (jsonData) {
         console.log(jsonData);
 
+        // get current time to check if daytime
         const time = new Date().getTime() / 1000;
         const isDay =
           time >= jsonData.sys.sunrise && time <= jsonData.sys.sunset;
 
         // weather icon and description
-        var iconCode = jsonData.weather[0].icon;
-        var weatherMain = jsonData.weather[0].main;
-        var weatherDesc = jsonData.weather[0].description;
-        var icon = document.createElement("img");
+        const iconCode = jsonData.weather[0].icon;
+        const weatherMain = jsonData.weather[0].main;
+        const weatherDesc = jsonData.weather[0].description;
+        const icon = document.createElement("img");
         icon.setAttribute(
           "src",
           `https://openweathermap.org/img/wn/${iconCode}@2x.png`
@@ -39,10 +46,11 @@ document.addEventListener("DOMContentLoaded", function () {
         icon.setAttribute("alt", weatherDesc);
         results.appendChild(icon);
 
-        var mainDesc = document.createElement("p");
+        const mainDesc = document.createElement("p");
         mainDesc.innerHTML = `${weatherMain}`;
         results.appendChild(mainDesc);
 
+        // change background color palette depending on weather if daytime
         if (isDay) {
           if (weatherMain === "Clear") {
             document.body.style.background =
@@ -60,22 +68,23 @@ document.addEventListener("DOMContentLoaded", function () {
         } else {
           document.body.style.background = "linear-gradient(#2C3E50, #4CA1AF)";
         }
-        // city
-        var cityVal = jsonData.name;
-        var countryVal = jsonData.sys.country;
-        var location = document.createElement("p");
+
+        // location
+        const cityVal = jsonData.name;
+        const countryVal = jsonData.sys.country;
+        const location = document.createElement("p");
         location.innerHTML = `<b>Location</b>: ${cityVal}, ${countryVal}`;
         results.appendChild(location);
 
         // temperature
-        var tempVal = jsonData.main.temp;
-        var temp = document.createElement("p");
+        const tempVal = jsonData.main.temp;
+        const temp = document.createElement("p");
         temp.innerHTML = `<b>Temperature</b>: ${tempVal} degrees Fahrenheit`;
         results.appendChild(temp);
 
         // feels like
-        var feelsLikeVal = jsonData.main.feels_like;
-        var feelsLike = document.createElement("p");
+        const feelsLikeVal = jsonData.main.feels_like;
+        const feelsLike = document.createElement("p");
         feelsLike.innerHTML = `<b>Feels like</b>: ${feelsLikeVal} degrees Fahrenheit`;
         results.appendChild(feelsLike);
 
@@ -86,35 +95,36 @@ document.addEventListener("DOMContentLoaded", function () {
         results.appendChild(maxTemp);
 
         // min temp
-        var minTempVal = jsonData.main.temp_min;
-        var minTemp = document.createElement("p");
+        const minTempVal = jsonData.main.temp_min;
+        const minTemp = document.createElement("p");
         minTemp.innerHTML = `<b>Min temperature</b>: ${minTempVal} degrees Fahrenheit`;
         results.appendChild(minTemp);
 
         // wind speed
-        var windSpeedVal = jsonData.wind.speed;
-        var windSpeed = document.createElement("p");
+        const windSpeedVal = jsonData.wind.speed;
+        const windSpeed = document.createElement("p");
         windSpeed.innerHTML = `<b>Wind speed</b>: ${windSpeedVal} mph`;
         results.appendChild(windSpeed);
 
         // atmospheric pressure on ground level
-        var grndLvlVal = jsonData.main.grnd_level;
-        var grndLvl = document.createElement("p");
+        const grndLvlVal = jsonData.main.grnd_level;
+        const grndLvl = document.createElement("p");
         grndLvl.innerHTML = `<b>Atmospheric pressure on ground level</b>: ${grndLvlVal} hPa`;
         results.appendChild(grndLvl);
 
         // Atmospheric pressure on sea level
-        var seaLevVal = jsonData.main.pressure;
-        var seaLev = document.createElement("p");
+        const seaLevVal = jsonData.main.pressure;
+        const seaLev = document.createElement("p");
         seaLev.innerHTML = `<b>Atmospheric pressure at sea level</b>: ${seaLevVal} hPa`;
         results.appendChild(seaLev);
 
         // humidity
-        var humidityVal = jsonData.main.humidity;
-        var humidity = document.createElement("p");
+        const humidityVal = jsonData.main.humidity;
+        const humidity = document.createElement("p");
         humidity.innerHTML = `<b>Humidity</b>: ${humidityVal}%`;
         results.appendChild(humidity);
 
+        // sunrise and sunset
         const sunrise = new Date(
           jsonData.sys.sunrise * 1000
         ).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
@@ -126,10 +136,15 @@ document.addEventListener("DOMContentLoaded", function () {
         sunTimes.innerHTML = `<b>Sunrise</b>: ${sunrise} | <b>Sunset</b>: ${sunset}`;
         results.appendChild(sunTimes);
 
+        // display the results
         results.style.display = "block";
       })
+      // if unsuccessful
       .catch(function (error) {
+        // output error to console
         console.log("Error fetching data", error);
+
+        // display error message on results div
         results.innerHTML =
           "<p><b>Error</b>: Unable to fetch data. Please try again.</p>";
         results.style.display = "block";
