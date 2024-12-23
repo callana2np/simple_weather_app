@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>Simple Weather Application</title>
+    <title>Simple Weather</title>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="stylesheet" href="styles.css" />
@@ -9,14 +9,16 @@
     <script type="text/javascript" src="script.js" defer></script>
   </head>
   <body>
-    <h1>Weather</h1>
+    <h1>Simple Weather</h1>
     <form id="city_form">
-      <input type="text" id="city_tbox" placeholder="e.g. New York" />
+      <input
+        type="text"
+        id="city_tbox"
+        placeholder="Enter a city (e.g. New York)"
+      />
       <button type="submit" value="Submit">Submit</button>
     </form>
     <br />
-    <div id="results">
-      <div id="spinner" class="hidden"></div>
-    </div>
+    <div id="results"></div>
   </body>
 </html>

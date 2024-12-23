@@ -112,7 +112,7 @@ document.addEventListener("DOMContentLoaded", function () {
         grndLvl.innerHTML = `<b>Atmospheric pressure on ground level</b>: ${grndLvlVal} hPa`;
         results.appendChild(grndLvl);
 
-        // Atmospheric pressure on sea level
+        // atmospheric pressure on sea level
         const seaLevVal = jsonData.main.pressure;
         const seaLev = document.createElement("p");
         seaLev.innerHTML = `<b>Atmospheric pressure at sea level</b>: ${seaLevVal} hPa`;
@@ -125,13 +125,22 @@ document.addEventListener("DOMContentLoaded", function () {
         results.appendChild(humidity);
 
         // sunrise and sunset
-        const sunrise = new Date(
-          jsonData.sys.sunrise * 1000
-        ).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-        const sunset = new Date(jsonData.sys.sunset * 1000).toLocaleTimeString(
-          [],
-          { hour: "2-digit", minute: "2-digit" }
-        );
+        // get timezone for offset
+        const offset = jsonData.timezone;
+
+        // convert sunrise and sunset Unix time + offset to milliseconds
+        // then call toUTCString() method
+        let sunrise = new Date(
+          (jsonData.sys.sunrise + offset) * 1000
+        ).toUTCString();
+        let sunset = new Date(
+          (jsonData.sys.sunset + offset) * 1000
+        ).toUTCString();
+
+        // convert UTC formats of sunrise and sunset to SDT
+        sunrise = utcToSDT(sunrise);
+        sunset = utcToSDT(sunset);
+
         const sunTimes = document.createElement("p");
         sunTimes.innerHTML = `<b>Sunrise</b>: ${sunrise} | <b>Sunset</b>: ${sunset}`;
         results.appendChild(sunTimes);
@@ -151,3 +160,30 @@ document.addEventListener("DOMContentLoaded", function () {
       });
   });
 });
+
+// convert UTC format to SDT format
+function utcToSDT(utcTime) {
+  // extract hours and seconds from UTC time
+  let time = utcTime.slice(17, 22).split(":");
+  const hrs = Number(time[0]);
+  const mins = Number(time[1]);
+
+  // build SDT string
+  let timeStr = "";
+
+  // starting with hours
+  if (hrs > 0 && hrs <= 12) {
+    timeStr += hrs;
+  } else if (hrs > 12) {
+    timeStr += hrs - 12;
+  } else if (hrs == 0) {
+    timeStr += 12;
+  }
+
+  // ending with minutes
+  timeStr += ":" + mins;
+  timeStr += hrs >= 12 ? " PM" : " AM";
+
+  // return SDT string
+  return timeStr;
+}
