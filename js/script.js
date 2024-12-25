@@ -1,3 +1,6 @@
+// import function to get country name from country code
+import { getCountry } from "./country-mappings.js";
+
 // get OpenWeatherMap API key
 var apiKey = config.API_KEY;
 
@@ -28,6 +31,9 @@ document.addEventListener("DOMContentLoaded", function () {
       })
       .then(function (jsonData) {
         console.log(jsonData);
+
+        // Unicode escape sequence degrees F sign
+        const fahrSym = "\u2109";
 
         // get current time to check if daytime
         const time = new Date().getTime() / 1000;
@@ -72,32 +78,34 @@ document.addEventListener("DOMContentLoaded", function () {
         // location
         const cityVal = jsonData.name;
         const countryVal = jsonData.sys.country;
+        // convert country code to country name
+        const countryName = getCountry(countryVal);
         const location = document.createElement("p");
-        location.innerHTML = `<b>Location</b>: ${cityVal}, ${countryVal}`;
+        location.innerHTML = `<b>Location</b>: ${cityVal}, ${countryName}`;
         results.appendChild(location);
 
         // temperature
-        const tempVal = jsonData.main.temp;
+        const tempVal = jsonData.main.temp.toFixed(1);
         const temp = document.createElement("p");
-        temp.innerHTML = `<b>Temperature</b>: ${tempVal} degrees Fahrenheit`;
+        temp.innerHTML = `<b>Temperature</b>: ${tempVal}${fahrSym}`;
         results.appendChild(temp);
 
         // feels like
-        const feelsLikeVal = jsonData.main.feels_like;
+        const feelsLikeVal = jsonData.main.feels_like.toFixed(1);
         const feelsLike = document.createElement("p");
-        feelsLike.innerHTML = `<b>Feels like</b>: ${feelsLikeVal} degrees Fahrenheit`;
+        feelsLike.innerHTML = `<b>Feels like</b>: ${feelsLikeVal}${fahrSym}`;
         results.appendChild(feelsLike);
 
         // max temp
-        var maxTempVal = jsonData.main.temp_max;
+        var maxTempVal = jsonData.main.temp_max.toFixed(1);
         var maxTemp = document.createElement("p");
-        maxTemp.innerHTML = `<b>Max temperature</b>: ${maxTempVal} degrees Fahrenheit`;
+        maxTemp.innerHTML = `<b>Max temperature</b>: ${maxTempVal}${fahrSym}`;
         results.appendChild(maxTemp);
 
         // min temp
-        const minTempVal = jsonData.main.temp_min;
+        const minTempVal = jsonData.main.temp_min.toFixed(1);
         const minTemp = document.createElement("p");
-        minTemp.innerHTML = `<b>Min temperature</b>: ${minTempVal} degrees Fahrenheit`;
+        minTemp.innerHTML = `<b>Min temperature</b>: ${minTempVal}${fahrSym}`;
         results.appendChild(minTemp);
 
         // wind speed
