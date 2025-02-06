@@ -2,7 +2,7 @@
 import { getCountry } from "./country-mappings.js";
 
 // get OpenWeatherMap API key
-var apiKey = config.API_KEY;
+const apiKey = config.API_KEY;
 
 // only after DOM loaded
 document.addEventListener("DOMContentLoaded", function () {
@@ -20,6 +20,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // reset results on new input
     results.innerHTML = "";
+
+    // if user gave empty input, display error
+    if (cityName == "") {
+      results.innerHTML = "<p><b>Error</b>: Please enter a city name.</p>";
+      return;
+    }
 
     // request to OpenWeatherMap API
     fetch(
@@ -78,6 +84,7 @@ document.addEventListener("DOMContentLoaded", function () {
         // location
         const cityVal = jsonData.name;
         const countryVal = jsonData.sys.country;
+
         // convert country code to country name
         const countryName = getCountry(countryVal);
         const location = document.createElement("p");
@@ -120,6 +127,38 @@ document.addEventListener("DOMContentLoaded", function () {
         grndLvl.innerHTML = `<b>Atmospheric pressure on ground level</b>: ${grndLvlVal} hPa`;
         results.appendChild(grndLvl);
 
+        // elevation
+        // latitude and longitude
+        const lat = jsonData.coord.lat;
+        const long = jsonData.coord.lon;
+
+        // request to Elevation API
+        fetch(
+          `https://api.open-meteo.com/v1/elevation?latitude=${lat}&longitude=${long}`
+        )
+          .then(function (response) {
+            return response.json();
+          })
+          .then(function (elevData) {
+            console.log(elevData);
+
+            // convert elevation in m to ft
+            const elevM = elevData.elevation;
+            // Locale string to add commas for higher elevations
+            const elevFt = Math.round(elevM * 3.28084).toLocaleString();
+
+            const elev = document.createElement("p");
+            elev.innerHTML = `<b>Elevation</b>: ${elevFt} ft above sea level`;
+            results.appendChild(elev);
+          })
+          // if Elevation API connection unsuccessful
+          .catch(function (error) {
+            console.log("Error fetching elevation data", error);
+            const elev = document.createElement("p");
+            elev.innerHTML = `<b>Elevation</b>: Unavailable`;
+            results.appendChild(elev);
+          });
+
         // atmospheric pressure on sea level
         const seaLevVal = jsonData.main.pressure;
         const seaLev = document.createElement("p");
@@ -153,15 +192,15 @@ document.addEventListener("DOMContentLoaded", function () {
         sunTimes.innerHTML = `<b>Sunrise</b>: ${sunrise} | <b>Sunset</b>: ${sunset}`;
         results.appendChild(sunTimes);
 
-        // display the results
+        // display all results
         results.style.display = "block";
       })
-      // if unsuccessful
+      // if OWP connection unsuccessful
       .catch(function (error) {
         // output error to console
         console.log("Error fetching data", error);
 
-        // display error message on results div
+        // display error message
         results.innerHTML =
           "<p><b>Error</b>: Unable to fetch data. Please try again.</p>";
         results.style.display = "block";
@@ -188,10 +227,13 @@ function utcToSDT(utcTime) {
     timeStr += 12;
   }
 
+  // if the minutes are single digit, then add a zero
+  // ex: 7:1 PM -> 7:01 PM
+  const minsStr = mins < 10 ? "0" + mins : mins;
+
   // ending with minutes
-  timeStr += ":" + mins;
+  timeStr += ":" + minsStr;
   timeStr += hrs >= 12 ? " PM" : " AM";
 
-  // return SDT string
   return timeStr;
 }
