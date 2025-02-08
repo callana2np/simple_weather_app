@@ -1,27 +1,25 @@
-// import function to get country name from country code
+// country code mappings
 import { getCountry } from "./country-mappings.js";
 
-// get OpenWeatherMap API key
 const apiKey = config.API_KEY;
 
 // only after DOM loaded
 document.addEventListener("DOMContentLoaded", function () {
-  var cityName;
   const form = document.getElementById("city_form");
   const results = document.getElementById("results");
 
-  // "Submit" button event handler
   form.addEventListener("submit", function (event) {
+    // prevent page reload when form submitted
     event.preventDefault();
 
-    // fetch location from textbox
-    cityName = document.getElementById("city_tbox").value;
+    // get location input
+    const cityName = document.getElementById("city_tbox").value;
     console.log(cityName);
 
-    // reset results on new input
+    // clear results from previous output
     results.innerHTML = "";
 
-    // if user gave empty input, display error
+    // display error if user gives blank input
     if (cityName == "") {
       results.innerHTML = "<p><b>Error</b>: Please enter a city name.</p>";
       return;
@@ -37,9 +35,6 @@ document.addEventListener("DOMContentLoaded", function () {
       })
       .then(function (jsonData) {
         console.log(jsonData);
-
-        // Unicode escape sequence degrees F sign
-        const fahrSym = "\u2109";
 
         // get current time to check if daytime
         const time = new Date().getTime() / 1000;
@@ -91,6 +86,9 @@ document.addEventListener("DOMContentLoaded", function () {
         location.innerHTML = `<b>Location</b>: ${cityVal}, ${countryName}`;
         results.appendChild(location);
 
+        // Unicode escape sequence degrees F sign
+        const fahrSym = "\u2109";
+
         // temperature
         const tempVal = jsonData.main.temp.toFixed(1);
         const temp = document.createElement("p");
@@ -104,8 +102,8 @@ document.addEventListener("DOMContentLoaded", function () {
         results.appendChild(feelsLike);
 
         // max temp
-        var maxTempVal = jsonData.main.temp_max.toFixed(1);
-        var maxTemp = document.createElement("p");
+        const maxTempVal = jsonData.main.temp_max.toFixed(1);
+        const maxTemp = document.createElement("p");
         maxTemp.innerHTML = `<b>Max temperature</b>: ${maxTempVal}${fahrSym}`;
         results.appendChild(maxTemp);
 
@@ -144,6 +142,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
             // convert elevation in m to ft
             const elevM = elevData.elevation;
+
             // Locale string to add commas for higher elevations
             const elevFt = Math.round(elevM * 3.28084).toLocaleString();
 
@@ -176,7 +175,6 @@ document.addEventListener("DOMContentLoaded", function () {
         const offset = jsonData.timezone;
 
         // convert sunrise and sunset Unix time + offset to milliseconds
-        // then call toUTCString() method
         let sunrise = new Date(
           (jsonData.sys.sunrise + offset) * 1000
         ).toUTCString();
@@ -208,14 +206,12 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 });
 
-// convert UTC format to SDT format
 function utcToSDT(utcTime) {
   // extract hours and seconds from UTC time
-  let time = utcTime.slice(17, 22).split(":");
+  const time = utcTime.slice(17, 22).split(":");
   const hrs = Number(time[0]);
   const mins = Number(time[1]);
 
-  // build SDT string
   let timeStr = "";
 
   // starting with hours

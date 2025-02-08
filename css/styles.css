@@ -1,38 +1,27 @@
 body {
-  background: linear-gradient(#eeaf61, #fb9062, #ee5d6c, #ce4993, #6a0d83);
+  background: linear-gradient(#152852, #4b3d60, #fd5e53, #fc9c54, #ffe373);
+  font-family: Arial, Helvetica, sans-serif;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  color: white;
   min-height: 100vh;
-  margin: 0;
-  font-family: Arial, Helvetica, sans-serif;
-  color: #fff;
 }
 
 /* "WEATHER" HEADING */
 h1 {
-  font-size: 2.5rem;
-  margin-bottom: 20px;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+  text-shadow: 0px 2px 4px black;
 }
 
 /* INPUT FORM */
-/* Form */
-form {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  max-width: 400px;
-}
-
 /* Input Box */
 input {
-  padding: 10px;
+  padding: 12px;
   font-size: 1rem;
   border: none;
   border-radius: 5px;
-  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2);
+  box-shadow: 0px 2px 4px black;
 }
 
 /* Submit Button */
@@ -44,7 +33,7 @@ button {
   background-color: #555555;
   color: white;
   cursor: pointer;
-  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2);
+  box-shadow: 0px 2px 4px black;
 }
 
 button:hover {
@@ -55,19 +44,29 @@ button:hover {
 /* General Display */
 #results {
   display: none;
-  background: rgba(225, 225, 225, 0.2);
-  border: 2px solid #fff;
-  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.2);
+  border: 2px solid white;
+  border-radius: 50px;
   padding: 20px;
-  margin-top: 20px;
-  margin-bottom: 20px;
-  max-width: 400px;
   text-align: center;
 }
 
 /* Text Formatting */
 #results p {
-  margin: 10px 0;
-  line-height: 1.5;
-  text-align: center;
+  margin: 10px 0px;
+}
+
+/* MOBILE LAYOUT */
+@media (max-width: 600px) {
+  h1 {
+    font-size: 1.5rem;
+  }
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  #results {
+    max-width: 70%;
+  }
 }
