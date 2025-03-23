@@ -1,23 +1,23 @@
-name: GitHub Pages Deployment
+name: Deploy to GitHub Pages
 
 on:
   push:
     branches:
-      - main
+      - main  # Replace with your default branch if different
 
 jobs:
   deploy:
-    name: Deploy to GitHub Pages
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Create config file with API key
-        run: echo "var config = { API_KEY: '${{ secrets.API_KEY }}' };" > config.js
+      - name: Inject API Key into config.js
+        run: | 
+          echo "var config = { API_KEY: '${{ secrets.API_KEY }}' };" > config.js
 
-      - name: Deploy website
+      - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           branch: gh-pages
