@@ -1,7 +1,7 @@
 // country code mappings
 import { getCountry } from "./country-mappings.js";
 
-const apiKey = process.env.API_KEY;
+const apiKey = config.API_KEY;
 
 // only after DOM loaded
 document.addEventListener("DOMContentLoaded", function () {
