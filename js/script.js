@@ -1,7 +1,7 @@
 // country code mappings
 import { getCountry } from "./country-mappings.js";
 
-const apiKey = config.API_KEY;
+const apiKey = process.env.API_KEY;
 
 // only after DOM loaded
 document.addEventListener("DOMContentLoaded", function () {
@@ -20,7 +20,7 @@ document.addEventListener("DOMContentLoaded", function () {
     results.innerHTML = "";
 
     // display error if user gives blank input
-    if (cityName == "") {
+    if (!cityName) {
       results.innerHTML = "<p><b>Error</b>: Please enter a city name.</p>";
       return;
     }
@@ -36,10 +36,9 @@ document.addEventListener("DOMContentLoaded", function () {
       .then(function (jsonData) {
         console.log(jsonData);
 
-        // get current time to check if daytime
-        const time = new Date().getTime() / 1000;
-        const isDay =
-          time >= jsonData.sys.sunrise && time <= jsonData.sys.sunset;
+        // latitude and longitude
+        const lat = jsonData.coord.lat;
+        const long = jsonData.coord.lon;
 
         // weather icon and description
         const iconCode = jsonData.weather[0].icon;
@@ -53,9 +52,39 @@ document.addEventListener("DOMContentLoaded", function () {
         icon.setAttribute("alt", weatherDesc);
         results.appendChild(icon);
 
+        // location
+        const cityVal = jsonData.name;
+        const countryVal = jsonData.sys.country;
+
+        // convert country code to country name
+        const countryName = getCountry(countryVal);
+        const location = document.createElement("h3");
+        location.innerHTML = `${cityVal}, ${countryName}`;
+        results.appendChild(location);
+
+        // get timezone for offset
+        const offset = jsonData.timezone;
+
+        // current time
+        const timeVal = new Date().getTime();
+        const timeStr = utcToSDT(
+          new Date(timeVal + offset * 1000).toUTCString()
+        );
+        const time = document.createElement("p");
+        time.innerHTML = `${timeStr}`;
+        results.appendChild(time);
+
         const mainDesc = document.createElement("p");
         mainDesc.innerHTML = `${weatherMain}`;
         results.appendChild(mainDesc);
+
+        // reset text color
+        document.body.style.color = "white";
+
+        // check if day
+        const isDay =
+          timeVal / 1000 >= jsonData.sys.sunrise &&
+          timeVal / 1000 <= jsonData.sys.sunset;
 
         // change background color palette depending on weather if daytime
         if (isDay) {
@@ -69,22 +98,14 @@ document.addEventListener("DOMContentLoaded", function () {
             document.body.style.background =
               "linear-gradient(#4e54c8, #8f94fb)";
           } else if (weatherMain === "Snow") {
+            // change text color to black for visibility purposes
+            document.body.style.color = "black";
             document.body.style.background =
               "linear-gradient(#d3cce3, #e9e4f0)";
           }
         } else {
           document.body.style.background = "linear-gradient(#2C3E50, #4CA1AF)";
         }
-
-        // location
-        const cityVal = jsonData.name;
-        const countryVal = jsonData.sys.country;
-
-        // convert country code to country name
-        const countryName = getCountry(countryVal);
-        const location = document.createElement("p");
-        location.innerHTML = `<b>Location</b>: ${cityVal}, ${countryName}`;
-        results.appendChild(location);
 
         // Unicode escape sequence degrees F sign
         const fahrSym = "\u2109";
@@ -119,6 +140,31 @@ document.addEventListener("DOMContentLoaded", function () {
         windSpeed.innerHTML = `<b>Wind speed</b>: ${windSpeedVal} mph`;
         results.appendChild(windSpeed);
 
+        // air quality
+        // request to Air Pollution API
+        fetch(
+          `http://api.openweathermap.org/data/2.5/air_pollution?lat=${lat}&lon=${long}&appid=${apiKey}`
+        )
+          .then(function (response) {
+            return response.json();
+          })
+          .then(function (aqiData) {
+            console.log(aqiData);
+
+            // AQI value
+            const aqiVal = aqiData.list[0].main.aqi;
+            const aqi = document.createElement("p");
+            aqi.innerHTML = `<b>Air quality</b>: ${aqiVal} (${aqiDesc[aqiVal]})`;
+            results.appendChild(aqi);
+          })
+          // if connection unsuccessful
+          .catch(function (error) {
+            console.log("Error fetching air quality data", error);
+            const elev = document.createElement("p");
+            elev.innerHTML = `<b>Air quality</b>: Unavailable`;
+            results.appendChild(elev);
+          });
+
         // atmospheric pressure on ground level
         const grndLvlVal = jsonData.main.grnd_level;
         const grndLvl = document.createElement("p");
@@ -126,10 +172,6 @@ document.addEventListener("DOMContentLoaded", function () {
         results.appendChild(grndLvl);
 
         // elevation
-        // latitude and longitude
-        const lat = jsonData.coord.lat;
-        const long = jsonData.coord.lon;
-
         // request to Elevation API
         fetch(
           `https://api.open-meteo.com/v1/elevation?latitude=${lat}&longitude=${long}`
@@ -147,7 +189,11 @@ document.addEventListener("DOMContentLoaded", function () {
             const elevFt = Math.round(elevM * 3.28084).toLocaleString();
 
             const elev = document.createElement("p");
-            elev.innerHTML = `<b>Elevation</b>: ${elevFt} ft above sea level`;
+            elev.innerHTML =
+              `<b>Elevation</b>: ` +
+              (elevFt < 0
+                ? `${elevFt * -1} feet below sea level`
+                : `${elevFt} feet above sea level`);
             results.appendChild(elev);
           })
           // if Elevation API connection unsuccessful
@@ -171,9 +217,6 @@ document.addEventListener("DOMContentLoaded", function () {
         results.appendChild(humidity);
 
         // sunrise and sunset
-        // get timezone for offset
-        const offset = jsonData.timezone;
-
         // convert sunrise and sunset Unix time + offset to milliseconds
         let sunrise = new Date(
           (jsonData.sys.sunrise + offset) * 1000
@@ -205,6 +248,15 @@ document.addEventListener("DOMContentLoaded", function () {
       });
   });
 });
+
+// Description conversions from OpenWeatherMap Air Pollution API docs
+const aqiDesc = {
+  1: "Good",
+  2: "Fair",
+  3: "Moderate",
+  4: "Poor",
+  5: "Very Poor",
+};
 
 function utcToSDT(utcTime) {
   // extract hours and seconds from UTC time
